@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Notif RayMarket</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; display: flex; justify-content: center; padding: 50px; }
+        .box { background: white; padding: 30px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        input, textarea, button { width: 100%; margin-bottom: 15px; padding: 10px; box-sizing: border-box; border-radius: 5px; border: 1px solid #ccc; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        #status { display: none; padding: 10px; margin-bottom: 15px; border-radius: 5px; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="box">
+        <h2 style="text-align: center; margin-top:0;">Kirim Notif User</h2>
+        <div id="status"></div>
+        
+        <form id="formNotif">
+            <label>Username Tujuan:</label>
+            <input type="text" id="username" placeholder="Contoh: ray_user" required>
+            
+            <label>Judul Notifikasi:</label>
+            <input type="text" id="judul" placeholder="Contoh: Promo Spesial" required>
+            
+            <label>Pesan:</label>
+            <textarea id="pesan" rows="4" placeholder="Tulis isi pesan..." required></textarea>
+            
+            <button type="submit" id="btnSubmit">Kirim via Vercel</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('formNotif').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('btnSubmit');
+            const statusDiv = document.getElementById('status');
+            btn.innerText = "Mengirim...";
+            btn.disabled = true;
+
+            const payload = {
+                username: document.getElementById('username').value,
+                judul: document.getElementById('judul').value,
+                pesan: document.getElementById('pesan').value
+            };
+
+            try {
+                // Nembak ke fungsi Serverless Vercel kita
+                const response = await fetch('/api/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    statusDiv.style.display = 'block';
+                    statusDiv.style.background = '#d4edda';
+                    statusDiv.style.color = '#155724';
+                    statusDiv.innerText = result.message;
+                    document.getElementById('formNotif').reset();
+                } else {
+                    throw new Error("Gagal kirim dari server");
+                }
+            } catch (error) {
+                statusDiv.style.display = 'block';
+                statusDiv.style.background = '#f8d7da';
+                statusDiv.style.color = '#721c24';
+                statusDiv.innerText = "Error: Cek koneksi API!";
+            } finally {
+                btn.innerText = "Kirim via Vercel";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
